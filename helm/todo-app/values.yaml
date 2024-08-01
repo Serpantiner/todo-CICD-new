@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: your-dockerhub-username/todo-app
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: todo-app.local
+      paths:
+        - path: /
+          pathType: Prefix
