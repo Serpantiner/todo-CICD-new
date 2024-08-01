@@ -7,10 +7,19 @@
 </head>
 <body>
     <h1>Todo App - {{ environment.capitalize() }}</h1>
+
+    {% if environment == 'development' %}
+    <div style="background-color: #ffcccc; padding: 10px; margin-bottom: 20px;">
+        <h2>Development Environment</h2>
+        <p>This banner is only visible in the development environment.</p>
+    </div>
+    {% endif %}
+
     <form action="{{ url_for('add') }}" method="POST">
         <input type="text" name="todo" placeholder="Enter a todo">
         <button type="submit">Add Todo</button>
     </form>
+
     <ul>
         {% for todo in todos %}
             <li>
@@ -19,5 +28,11 @@
             </li>
         {% endfor %}
     </ul>
+
+    {% if environment == 'development' %}
+    <script>
+        console.log('Development mode: Additional logging enabled');
+    </script>
+    {% endif %}
 </body>
 </html>
