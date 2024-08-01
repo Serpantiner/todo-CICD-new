@@ -1,20 +1,20 @@
 replicaCount: 1
 
 image:
-  repository: serpantiners/todo-app  # Replace *** with your actual DockerHub username
+  repository: serpantiners/todo-app  
   tag: latest
   pullPolicy: Always
 
 service:
   type: NodePort
   port: 80
-  nodePort: null  # This allows Kubernetes to assign a random nodePort
+  nodePort: null  
 
 ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: todo-app-dev.local  # Changed to make it unique for dev environment
+    - host: todo-app-dev.local 
       paths:
         - path: /
           pathType: Prefix
@@ -26,4 +26,4 @@ database:
   host: todo-app-db
   port: 5432
 
-namePrefix: dev-  # Add this line to create unique resource names
+namePrefix: dev-  
