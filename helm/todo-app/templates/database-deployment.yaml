@@ -1,38 +1,28 @@
-{{- if .Values.database.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-db
+  name: todo-app-db
+  labels:
+    app: todo-app-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-db
+      app: todo-app-db
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-db
+        app: todo-app-db
     spec:
       containers:
-      - name: postgres
-        image: postgres:13
-        env:
-        - name: POSTGRES_DB
-          value: todos
-        - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD
-          value: password
-        ports:
-        - containerPort: 5432
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-db
-spec:
-  selector:
-    app: {{ .Release.Name }}-db
-  ports:
-    - port: 5432
-{{- end }}
+        - name: postgres
+          image: postgres:13
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "{{ .Values.database.name }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.database.user }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.database.password }}"

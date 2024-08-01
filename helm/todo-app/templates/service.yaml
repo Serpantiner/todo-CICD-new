@@ -1,11 +1,28 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}
+  name: todo-app
+  labels:
+    app: todo-app
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 5000
+      targetPort: 80
   selector:
-    app: {{ .Release.Name }}
+    app: todo-app
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-app-db
+  labels:
+    app: todo-app-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+  selector:
+    app: todo-app-db
