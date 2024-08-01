@@ -1,11 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-db
+  labels:
+    app: todo-app-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app-db
+  template:
+    metadata:
+      labels:
+        app: todo-app-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          env:
+            - name: POSTGRES_DB
+              value: "tododb"
+            - name: POSTGRES_USER
+              value: "todouser"
+            - name: POSTGRES_PASSWORD
+              value: "todopassword"
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-app-db
+spec:
+  selector:
+    app: todo-app-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: todo-app
-  labels:
-    app: todo-app
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: todo-app
@@ -15,10 +55,26 @@ spec:
         app: todo-app
     spec:
       containers:
-        - name: todo-app
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          ports:
-            - containerPort: 80
-          env:
-            - name: DATABASE_URL
-              value: "postgresql://{{ .Values.database.user }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+      - name: todo-app
+        image: serpantiners/todo-app:latest
+        ports:
+        - containerPort: 5467
+        env:
+        - name: DATABASE_URL
+          value: postgresql://todouser:todopassword@todo-app-db:5432/tododb
+        - name: FLASK_RUN_PORT
+          value: "5467"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-app
+spec:
+  selector:
+    app: todo-app
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5467
+      nodePort: 30166

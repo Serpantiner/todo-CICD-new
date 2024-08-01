@@ -21,7 +21,7 @@ spec:
               service:
                 name: todo-app
                 port:
-                  number: 80
+                  number: {{ $.Values.service.port }}
         {{- end }}
   {{- end }}
 {{- end -}}
