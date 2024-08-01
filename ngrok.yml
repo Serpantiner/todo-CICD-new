@@ -1,5 +1,0 @@
-version: "2"
-tunnels:
-  minikube:
-    proto: tcp
-    addr: 8443

@@ -2,13 +2,16 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main ]
+    branches: [main, dev]
 
 jobs:
   build-and-deploy:
     runs-on: self-hosted
+    
+    env:
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app
 
     steps:
     - uses: actions/checkout@v2
@@ -24,12 +27,22 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Set environment and tag
+      run: |
+        if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+          echo "ENV=prod" >> $GITHUB_ENV
+          echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+        elif [[ ${{ github.ref }} == 'refs/heads/dev' || ${{ github.event_name }} == 'pull_request' ]]; then
+          echo "ENV=dev" >> $GITHUB_ENV
+          echo "TAG=dev-${{ github.sha }}" >> $GITHUB_ENV
+        fi
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}
+        tags: ${{ env.DOCKER_IMAGE }}:${{ env.TAG }}
 
     - name: Install Helm
       run: |
@@ -37,11 +50,11 @@ jobs:
 
     - name: Deploy to Minikube
       run: |
-        minikube -p minikube-dev status
-        kubectl config use-context minikube-dev
-        helm upgrade --install todo-app ./helm/todo-app \
-          --set image.repository=${{ secrets.DOCKERHUB_USERNAME }}/todo-app \
-          --set image.tag=${{ github.sha }} \
-          --namespace todo-app-ns \
+        minikube -p minikube-${{ env.ENV }} status
+        kubectl config use-context minikube-${{ env.ENV }}
+        helm upgrade --install todo-app-${{ env.ENV }} ./helm/todo-app \
+          --set image.repository=${{ env.DOCKER_IMAGE }} \
+          --set image.tag=${{ env.TAG }} \
+          --namespace todo-app-${{ env.ENV }}-ns \
           --create-namespace
       shell: bash

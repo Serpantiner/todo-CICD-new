@@ -19,8 +19,8 @@ ingress:
           pathType: Prefix
 
 database:
-  host: todo-app-db
-  port: 5432
   name: your_database_name
   user: your_database_user
   password: your_database_password
+  host: todo-app-db
+  port: 5432
