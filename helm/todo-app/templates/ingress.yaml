@@ -2,26 +2,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: todo-app
+  name: {{ .Release.Name }}
   labels:
-    app: todo-app
+    app: {{ .Release.Name }}
+    environment: {{ .Values.environment }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ .host }}
+    - host: {{ index .Values.config .Values.environment "ingress" "host" }}
       http:
         paths:
-        {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          - path: /
+            pathType: Prefix
             backend:
               service:
-                name: todo-app
+                name: {{ .Release.Name }}
                 port:
-                  number: {{ $.Values.service.port }}
-        {{- end }}
-  {{- end }}
+                  number: {{ .Values.service.port }}
 {{- end -}}
