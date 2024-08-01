@@ -1,9 +1,14 @@
+
+
 replicaCount: 1
 
 image:
   repository: serpantiners/todo-app
   tag: latest
   pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
 
 service:
   type: NodePort
@@ -12,11 +17,7 @@ service:
 ingress:
   enabled: true
   className: nginx
-  hosts:
-    - host: todo-app.local
-      paths:
-        - path: /
-          pathType: Prefix
+  annotations: {}
 
 database:
   name: tododb
@@ -25,14 +26,27 @@ database:
   host: todo-app-db
   port: 5432
 
-environment: dev  
+
+environment: dev
+
 
 config:
   dev:
     replicaCount: 1
+    environment: development
     ingress:
       host: dev.todo-app.local
   prod:
     replicaCount: 2
+    environment: production
     ingress:
       host: todo-app.local
+
+resources: {}
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
