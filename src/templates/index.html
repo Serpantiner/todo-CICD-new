@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo List</title>
+    <title>Todo App - {{ environment.capitalize() }}</title>
 </head>
 <body>
-    <h1>Todo List</h1>
-    <form action="{{ url_for('add') }}" method="post">
-        <input type="text" name="todo" required>
+    <h1>Todo App - {{ environment.capitalize() }}</h1>
+    <form action="{{ url_for('add') }}" method="POST">
+        <input type="text" name="todo" placeholder="Enter a todo">
         <button type="submit">Add Todo</button>
     </form>
     <ul>

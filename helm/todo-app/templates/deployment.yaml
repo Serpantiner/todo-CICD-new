@@ -72,6 +72,8 @@ spec:
           value: postgresql://{{ .Values.database.user }}:{{ .Values.database.password }}@{{ .Release.Name }}-db:5432/{{ .Values.database.name }}
         - name: FLASK_RUN_PORT
           value: "5467"
+        - name: FLASK_ENV
+          value: {{ index .Values.config .Values.environment "environment" }}
         - name: ENVIRONMENT
           value: {{ .Values.environment }}
 ---
