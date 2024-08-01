@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: self-hosted
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -34,13 +35,13 @@ jobs:
       run: |
         curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-        - name: Deploy to Minikube
-        run: |
-          minikube -p minikube-dev status
-          kubectl config use-context minikube-dev
-          helm upgrade --install todo-app ./helm/todo-app \
-            --set image.repository=${{ secrets.DOCKERHUB_USERNAME }}/todo-app \
-            --set image.tag=${{ github.sha }} \
-            --namespace todo-app-ns \
-            --create-namespace
-      
+    - name: Deploy to Minikube
+      run: |
+        minikube -p minikube-dev status
+        kubectl config use-context minikube-dev
+        helm upgrade --install todo-app ./helm/todo-app \
+          --set image.repository=${{ secrets.DOCKERHUB_USERNAME }}/todo-app \
+          --set image.tag=${{ github.sha }} \
+          --namespace todo-app-ns \
+          --create-namespace
+      shell: /bin/bash -e
