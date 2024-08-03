@@ -6,12 +6,14 @@ metadata:
   labels:
     app: {{ .Release.Name }}
     environment: {{ .Values.environment }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
-    - host: {{ index .Values.config .Values.environment "ingress" "host" }}
+    - host: {{ index .Values.config .Values.environment "ingress" "host" | quote }}
       http:
         paths:
           - path: /
@@ -19,6 +21,6 @@ spec:
             backend:
               service:
                 name: {{ .Release.Name }}
-                port:
+                port: 
                   number: {{ .Values.service.port }}
-{{- end -}}
+{{- end }}

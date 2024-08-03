@@ -1,40 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: todo-app-db
+  name: {{ .Release.Name }}-db
   labels:
-    app: todo-app-db
+    app: {{ .Release.Name }}-db
+    environment: {{ .Values.environment }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: todo-app-db
+      app: {{ .Release.Name }}-db
   template:
     metadata:
       labels:
-        app: todo-app-db
+        app: {{ .Release.Name }}-db
+        environment: {{ .Values.environment }}
     spec:
       containers:
         - name: postgres
           image: postgres:13
           env:
             - name: POSTGRES_DB
-              value: "tododb"
+              value: {{ .Values.database.name }}
             - name: POSTGRES_USER
-              value: "todouser"
+              value: {{ .Values.database.user }}
             - name: POSTGRES_PASSWORD
-              value: "todopassword"
+              value: {{ .Values.database.password }}
           ports:
             - containerPort: 5432
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: todo-app-db
-spec:
-  selector:
-    app: todo-app-db
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432

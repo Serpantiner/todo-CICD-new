@@ -18,6 +18,12 @@ ingress:
   enabled: true
   className: nginx
   annotations: {}
+  hosts:
+    - host: todo-app.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
 
 database:
   name: tododb
@@ -26,27 +32,25 @@ database:
   host: todo-app-db
   port: 5432
 
-
 environment: dev
 
+containerPort: 5467
 
 config:
   dev:
     replicaCount: 1
     environment: development
     ingress:
-      host: dev.todo-app.local
+      host: dev-todo-app.local
+    flaskEnv: development
   prod:
     replicaCount: 2
     environment: production
     ingress:
-      host: todo-app.local
+      host: prod-todo-app.local
+    flaskEnv: production
 
 resources: {}
-
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}

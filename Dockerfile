@@ -5,6 +5,10 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY src/ src/
+COPY templates/ templates/
+COPY entrypoint.sh .
 
-CMD ["python", "app.py"]
+RUN chmod +x entrypoint.sh
+
+CMD ["./entrypoint.sh"]
