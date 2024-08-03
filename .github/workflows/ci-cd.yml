@@ -74,9 +74,23 @@ jobs:
     - name: Verify Dev Deployment
       if: needs.deploy-dev.result == 'success'
       run: |
-        kubectl get deployment todo-app-dev -n todo-app-dev-ns -o jsonpath='{.spec.template.spec.containers[0].image}'
+        DEV_IMAGE=$(kubectl get deployment todo-app-dev -n todo-app-dev-ns -o jsonpath='{.spec.template.spec.containers[0].image}')
+        EXPECTED_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}"
+        if [ "$DEV_IMAGE" = "$EXPECTED_IMAGE" ]; then
+          echo "Dev deployment verified successfully"
+        else
+          echo "Dev deployment verification failed"
+          exit 1
+        fi
 
     - name: Verify Prod Deployment
       if: needs.deploy-prod.result == 'success'
       run: |
-        kubectl get deployment todo-app-prod -n todo-app-prod-ns -o jsonpath='{.spec.template.spec.containers[0].image}'
+        PROD_IMAGE=$(kubectl get deployment todo-app-prod -n todo-app-prod-ns -o jsonpath='{.spec.template.spec.containers[0].image}')
+        EXPECTED_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}"
+        if [ "$PROD_IMAGE" = "$EXPECTED_IMAGE" ]; then
+          echo "Prod deployment verified successfully"
+        else
+          echo "Prod deployment verification failed"
+          exit 1
+        fi
