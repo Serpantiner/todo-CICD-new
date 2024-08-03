@@ -11,12 +11,24 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
 
   deploy-dev:
     needs: build
@@ -24,6 +36,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
+    
     - name: Deploy to Dev Minikube
       run: |
         minikube -p minikube-dev status
@@ -41,6 +54,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
+    
     - name: Deploy to Prod Minikube
       run: |
         minikube -p minikube-prod status
@@ -51,3 +65,17 @@ jobs:
           --set environment=prod \
           --namespace todo-app-prod-ns \
           --create-namespace
+
+  verify-deployment:
+    needs: [deploy-dev, deploy-prod]
+    runs-on: self-hosted
+    steps:
+    - name: Verify Dev Deployment
+      if: github.ref == 'refs/heads/dev' || github.event_name == 'pull_request'
+      run: |
+        kubectl get deployment todo-app-dev -n todo-app-dev-ns -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+    - name: Verify Prod Deployment
+      if: github.ref == 'refs/heads/main'
+      run: |
+        kubectl get deployment todo-app-prod -n todo-app-prod-ns -o jsonpath='{.spec.template.spec.containers[0].image}'
