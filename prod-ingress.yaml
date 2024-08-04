@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    meta.helm.sh/release-name: todo-app-prod
+    meta.helm.sh/release-namespace: todo-app-prod-ns
+  creationTimestamp: "2024-08-01T06:11:50Z"
+  generation: 2
+  labels:
+    app: todo-app-prod
+    app.kubernetes.io/managed-by: Helm
+    environment: prod
+  name: todo-app-prod
+  namespace: todo-app-prod-ns
+  resourceVersion: "43272"
+  uid: c32510e3-c449-400e-a6d3-6e0f56825db5
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: prod-todo-app.local
+    http:
+      paths:
+      - backend:
+          service:
+            name: todo-app-prod
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+status:
+  loadBalancer: {}

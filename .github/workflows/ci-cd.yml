@@ -66,16 +66,34 @@ jobs:
           --namespace todo-app-prod-ns \
           --create-namespace
 
-  verify-deployment:
-    needs: [deploy-dev, deploy-prod]
+  verify-dev:
+    needs: deploy-dev
+    if: github.ref == 'refs/heads/dev' || github.event_name == 'pull_request'
     runs-on: self-hosted
     steps:
     - name: Verify Dev Deployment
-      if: github.ref == 'refs/heads/dev' || github.event_name == 'pull_request'
       run: |
-        kubectl get deployment todo-app-dev -n todo-app-dev-ns -o jsonpath='{.spec.template.spec.containers[0].image}'
+        DEV_IMAGE=$(kubectl get deployment todo-app-dev -n todo-app-dev-ns -o jsonpath='{.spec.template.spec.containers[0].image}')
+        EXPECTED_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}"
+        if [ "$DEV_IMAGE" = "$EXPECTED_IMAGE" ]; then
+          echo "Dev deployment verified successfully"
+        else
+          echo "Dev deployment verification failed"
+          exit 1
+        fi
 
+  verify-prod:
+    needs: deploy-prod
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    steps:
     - name: Verify Prod Deployment
-      if: github.ref == 'refs/heads/main'
       run: |
-        kubectl get deployment todo-app-prod -n todo-app-prod-ns -o jsonpath='{.spec.template.spec.containers[0].image}'
+        PROD_IMAGE=$(kubectl get deployment todo-app-prod -n todo-app-prod-ns -o jsonpath='{.spec.template.spec.containers[0].image}')
+        EXPECTED_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/todo-app:${{ github.sha }}"
+        if [ "$PROD_IMAGE" = "$EXPECTED_IMAGE" ]; then
+          echo "Prod deployment verified successfully"
+        else
+          echo "Prod deployment verification failed"
+          exit 1
+        fi
